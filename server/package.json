@@ -1,0 +1,30 @@
+{
+  "name": "express-boilerplate",
+  "version": "1.0.0",
+  "description": "A boilerplate for an Express JS backend",
+  "license": "ISC",
+  "author": "Ashish kumar",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^7.0.0",
+    "mongodb": "^6.0.0",
+    "ollama": "^0.6.3",
+    "openai": "^6.15.0",
+    "pino": "^8.0.0",
+    "prom-client": "^14.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

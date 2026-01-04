@@ -1,0 +1,6 @@
+POST http://localhost:5678/webhook/agent/run
+Content-Type: application/json
+
+{
+  "query": "news on ram"
+}

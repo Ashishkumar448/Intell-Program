@@ -1,0 +1,214 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "id": "3764f009-b2ce-40c1-ae29-2271a966550e",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        600
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "rSh2u1SzlvxT0hi6",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f63b0137-5083-4b84-af9d-4c185320e68e",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        600
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "fKwmshS3P91aIHsg",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "id": "6aaecb45-6629-4df5-871c-444880185ea0",
+      "name": "Ollama Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        600
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "rSh2u1SzlvxT0hi6",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the message {{ $json.output }}",
+        "options": {
+          "systemMessage": "You are a Blogger\n- you take the message and analyze it\n- Write a professional grade blog on the message."
+        }
+      },
+      "id": "e30212cb-f8ba-4494-a6f8-6478ecac1b88",
+      "name": "Blog Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1420,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "341f0313-722f-4d4b-8dec-72eb06407654",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "269e8cbe-0d65-413c-8346-52248a42f2b4",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1800,
+        380
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e8df9024-6ae2-476c-91a6-c8bb2be3935c",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        860,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are a News Agent so you have to search for news specified in message and write a big and detailed summary"
+        }
+      },
+      "id": "04156d79-538f-466b-aa59-007cc4eae3a5",
+      "name": "News Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1040,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "News Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "News Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Blog Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blog Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "News Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "News Agent": {
+      "main": [
+        [
+          {
+            "node": "Blog Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "dc676873-30dc-4eb8-91f0-3c060f190383",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "789ce27d4c1e39b67173c5970a4c7d2752b3219b1828bfa71035069784356801"
+  },
+  "id": "gorsNClzSZz3yLLc",
+  "tags": []
+}

@@ -1,0 +1,276 @@
+{
+  "name": "Supervisor Agent api",
+  "nodes": [
+    {
+      "parameters": {
+        "name": "Calculator",
+        "description": "Call this agent to calculate.",
+        "workflowId": {
+          "__rl": true,
+          "value": "X2LRiHgUOBw3Kflu",
+          "mode": "list",
+          "cachedResultName": "My workflow"
+        }
+      },
+      "id": "14607c1a-3420-4002-acb1-ea0ae4ae1639",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1240,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "name": "news_tool",
+        "description": "Call this tool for news reports",
+        "workflowId": {
+          "__rl": true,
+          "value": "gorsNClzSZz3yLLc",
+          "mode": "list",
+          "cachedResultName": "My workflow 2"
+        }
+      },
+      "id": "260ab51a-366e-485f-997c-2a8949ac73a7",
+      "name": "News_tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "\"default-session\""
+      },
+      "id": "972ffc43-9a55-410d-a646-f915a128c59c",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.1,
+      "position": [
+        1160,
+        700
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "WKTGTyu7EDuTFb9w",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a02b4770-c8cc-4d5b-ba16-a473fa6bd36c",
+              "name": "body.query",
+              "value": "={{ $json.body.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53c59bc3-5bb7-4b77-afc3-df2513be13d7",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"response\": {{ JSON.stringify($json.output) }}\n}\n",
+        "options": {}
+      },
+      "id": "a44fdf96-789b-4a3a-9216-d63b024f9762",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/agent/run",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d9172206-2c5a-4046-86a6-21033c36dded",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        700,
+        380
+      ],
+      "webhookId": "32609523-be84-45e5-b630-36c857e6edb3"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "id": "a72345b8-6864-48eb-b6ae-232ef4e359dc",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        600
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "rSh2u1SzlvxT0hi6",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Supervisor Agent responsible for routing user queries to tools or answering directly.\n\nPRIMARY OBJECTIVE\nDecide whether to:\n1) Use the Calculator tool\n2) Use the News tool\n3) Answer directly using your own reasoning\n4) Use Web Search only if external, real-time information is required\n\nTOOL ROUTING RULES (STRICT)\n- If the user asks for ANY mathematical calculation, arithmetic, formula evaluation, or numeric computation:\n  → Call the Calculator tool.\n  → Return ONLY the exact text output produced by the Calculator tool.\n  → Do NOT rephrase, summarize, or add explanations.\n\n- If the user asks for news, headlines, recent updates, trends, announcements, or current events:\n  → Call the News tool.\n  → Return ONLY the exact text output produced by the News tool.\n  → Do NOT rephrase, summarize, or add explanations.\n\n- If the user asks a general question that does NOT require calculation or real-time news:\n  → Answer directly using your own knowledge.\n  → Be concise, clear, and accurate.\n\n- If the user asks for information that requires up-to-date, real-time, or external data:\n  → Use Web Search.\n  → Synthesize a clear final answer from the search results.\n\nOUTPUT CONSTRAINTS (MANDATORY)\n- When a tool is used, your final answer MUST be exactly the tool’s output.\n- When no tool is used, your answer must be plain text.\n- Do NOT mention tools, routing decisions, or internal reasoning.\n- Do NOT hallucinate data when a tool or web search is required.\n\nDECISION PRIORITY\nCalculator > News > Web Search > Direct Answer\n\nYou must always choose the most deterministic and minimal action required to answer correctly.\n\nhere is the query: {{ $json.body.query }} ",
+        "options": {}
+      },
+      "id": "d0ef458b-121a-43ed-b2b0-8367d21f9884",
+      "name": "Supervisor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1040,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "564b88af-5418-411a-81ad-356d07d25aac",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        600
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "fKwmshS3P91aIHsg",
+          "name": "SerpAPI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "News_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supervisor": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "060004ea-9f84-403c-9e2a-f991549404f7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "789ce27d4c1e39b67173c5970a4c7d2752b3219b1828bfa71035069784356801"
+  },
+  "id": "lGiJEEGgAZMRokDl",
+  "tags": []
+}
